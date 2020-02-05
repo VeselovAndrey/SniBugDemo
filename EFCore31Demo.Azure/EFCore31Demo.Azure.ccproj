@@ -58,4 +58,26 @@
     <CloudExtensionsDir Condition=" '$(CloudExtensionsDir)' == '' ">$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Windows Azure Tools\2.9\</CloudExtensionsDir>
   </PropertyGroup>
   <Import Project="$(CloudExtensionsDir)Microsoft.WindowsAzure.targets" />
+
+  <Import Project="..\packages\Microsoft.Data.SqlClient.SNI.1.1.0\build\net46\Microsoft.Data.SqlClient.SNI.targets" Condition="Exists('..\packages\Microsoft.Data.SqlClient.SNI.1.1.0\build\net46\Microsoft.Data.SqlClient.SNI.targets')" />
+  <Target Name="CopySNIRoleFiles"
+          Condition="'@(WorkerRoleReferences)' != ''"
+          Inputs="@(SNIFiles)"
+          Outputs="@(SNIFiles -> '$(_IntermediateWorkerOutputPath)%(RecursiveDir)%(Filename)%(Extension)')">
+    <PropertyGroup>
+      <_IntermediateWorkerOutputPath>%(WorkerRoleReferences.OutputDir)</_IntermediateWorkerOutputPath>
+    </PropertyGroup>
+    <Copy SourceFiles="@(SNIFiles)"
+          DestinationFiles="@(SNIFiles -> '$(_IntermediateWorkerOutputPath)%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+  <PropertyGroup>
+    <CollectRoleFilesDependsOn>
+      $(CollectRoleFilesDependsOn);
+      CollectSNIFiles;
+    </CollectRoleFilesDependsOn>
+    <CopyRoleFilesDependsOn>
+      $(CopyRoleFilesDependsOn)
+      CopySNIRoleFiles;
+    </CopyRoleFilesDependsOn>
+  </PropertyGroup>
 </Project>
